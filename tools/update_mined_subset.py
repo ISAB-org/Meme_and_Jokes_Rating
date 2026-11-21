@@ -63,7 +63,11 @@ for r in hist:
 for x in gem:
     if float(x.get('added_human_score') or 0) < 7 or x['id'] in seen: continue
     rows.append(public_gem(x)); seen.add(x['id'])
-data={'schema_version':'2.2','dataset':'gem_mined_human7_unreviewed_v1','dataset_version':'2026-11-21','items':rows}
+for row in rows:
+    sub = row.get('domain_zh','')
+    if '摄影' in sub: row['domain_id'] = '摄影'
+    elif 'Anthropic' in sub or 'Claude' in sub: row['domain_id'] = 'Anthropic/Claude'
+data={'schema_version':'2.2','dataset':'gem_mined_human7_unreviewed_v1','dataset_version':'2026-11-21-seven-categories','items':rows}
 data['dataset_sha256']=hashlib.sha256(json.dumps(data,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
 (OUT/'data.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
 print('selected',len(rows),'historical',sum(x['batch'].startswith('后续') for x in rows),'gem',sum(x['batch'].startswith('GEM') for x in rows))

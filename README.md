@@ -43,3 +43,5 @@ python3 tools/aggregate_reviews.py received_reviews --output ratings_merged.csv
 开发校验：`node --test tests/review-state.test.js`。修改公开条目时须同步更新dataset_version和dataset_sha256，避免混用不同版本的评分。`docs/images/`保存页面需要的全部原图。
 
 托管访问仍受GitHub Pages自身服务规则和日志政策约束；本应用不接入第三方分析、埋点或远程评分接口。
+
+当前主类别：铁路、航空、知乎回答、苏联、其他领域、摄影、Anthropic/Claude。摄影与 Anthropic/Claude 已从其他领域中独立，保留原小领域标签。
