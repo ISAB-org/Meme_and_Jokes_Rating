@@ -12,6 +12,8 @@ gem = json.loads((pkg / 'scored_gem_58.json').read_text())['items']
 
 def public_hist(r):
     o = r['original_record']; text = o.get('joke_text','')
+    raw = ' '.join(str(o.get(k,'')) for k in ('category','domain','source_url')).lower()
+    cat = '铁路' if any(k in raw for k in ('铁路','railway','train')) else ('航空' if any(k in raw for k in ('航空','aviation','airline','aircraft')) else ('苏联' if any(k in raw for k in ('苏联','soviet','ussr')) else ('知乎回答' if '知乎' in raw or 'zhihu' in raw else '其他领域')))
     media = o.get('local_media') or []; image = None
     if media:
         image = 'images/' + Path(media[0].get('local_path','')).name
@@ -19,7 +21,7 @@ def public_hist(r):
         if src.exists() and not dst.exists():
             dst.parent.mkdir(parents=True, exist_ok=True); shutil.copy2(src, dst)
     return {'id': r['id'], 'original_id': r['id'], 'legacy_gem_id': r['id'],
-        'domain_id': o.get('category') or 'other', 'domain_zh': o.get('domain') or '其他挖掘',
+        'domain_id': cat, 'domain_zh': o.get('domain') or '其他挖掘',
         'batch': '后续挖掘（均分≥7，待人工复核）', 'title': text[:80],
         'original_text': text, 'translation_zh': text if o.get('language') != 'en' else '',
         'translation_status': '待人工复核', 'image_path': image,
@@ -41,8 +43,10 @@ def public_gem(x):
             dst = OUT / image
             dst.parent.mkdir(parents=True, exist_ok=True)
             if not dst.exists(): shutil.copy2(src, dst)
+    raw = ' '.join(str(x.get(k,'')) for k in ('domain_id','subdomain','group','source')).lower()
+    cat = '铁路' if any(k in raw for k in ('铁路','railway','train')) else ('航空' if any(k in raw for k in ('航空','aviation','airline','aircraft')) else ('苏联' if any(k in raw for k in ('苏联','soviet','ussr')) else ('知乎回答' if '知乎' in raw or 'zhihu' in raw else '其他领域')))
     return {'id': x['id'], 'original_id': x.get('original_id',x['id']), 'legacy_gem_id': x.get('legacy_gem_id',x['id']),
-        'domain_id': x.get('domain_id','other'), 'domain_zh': x.get('subdomain') or x.get('group','其他'),
+        'domain_id': cat, 'domain_zh': x.get('subdomain') or x.get('group','其他'),
         'batch': 'GEM后续挖掘（评分≥7，待人工复核）', 'title': x.get('title',text[:80]),
         'original_text': text, 'translation_zh': x.get('translation_zh',''), 'translation_status': x.get('translation_status','待人工复核'),
         'image_path': image, 'organizer_context': x.get('organizer_context',''),
