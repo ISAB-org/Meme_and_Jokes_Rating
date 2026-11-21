@@ -2,11 +2,11 @@
 
 评分页面：https://isab-org.github.io/Meme_and_Jokes_Rating/
 
-这是独立的公开评分仓库。包含460条笑话、中文翻译与原文，覆盖50个小领域，其中136条带一张本地图片。编号沿用领域前缀＋四位数字＋GEM（如R0001GEM、XA0001GEM）。不包含研究主仓库的模型回答、模型分数、个人评分文件或本地备份。
+这是独立的公开评分仓库。当前暂保留原始五类（铁路、航空、知乎回答、苏联、其他领域），共158条：首轮材料与首轮之外人工评分≥7的条目。编号沿用领域前缀＋四位数字＋GEM（如R0001GEM、XA0001GEM）。不包含研究主仓库的模型回答、模型分数、个人评分文件或本地备份。
 
 ## 参与评分
 
-1. 打开上方页面，无需GitHub登录。
+1. 打开上方页面，输入组织者提供的 access 密码后开始评分，无需GitHub登录。
 2. 筛选熟悉的领域，阅读原文、中文译文及图片，可以只评部分条目。
 3. 填写「主机制是否有误」「解析是否完善」和1–10分的好笑程度，可选填写修正建议。前两项默认否/是，未操作的默认值不表示已审核。
 4. 点击「导出评分 JSON」，把文件通过邀请渠道发回组织者。页面不会自动提交评分。
@@ -24,7 +24,7 @@
 
 ## JSON和汇总
 
-`docs/data.json` 是公开条目，`docs/review-state.js` 定义导入、导出与合并逻辑。导出的评分文件的dataset为`gem460_v1`，schema_version为2.0，dataset_sha256绑定当前460条的公开内容版本。
+`docs/data.json` 是公开条目，`docs/review-state.js` 定义导入、导出与合并逻辑。当前 dataset 为 `gem_first_round_plus_human7_v1`，schema_version为2.1，dataset_sha256绑定当前158条的公开内容版本。
 
 组织者将回收文件存入本地`received_reviews/`，运行：
 
@@ -36,7 +36,7 @@ python3 tools/aggregate_reviews.py received_reviews --output ratings_merged.csv
 
 ## 部署与维护
 
-网站是无后端的HTML/CSS/JavaScript，GitHub Pages从main分支的`/docs`目录发布。无需API密钥或数据库。静态页面本身不接受评分上传；若以后需要自动回收，应另行配置有访问控制的收集服务。
+网站是无后端的HTML/CSS/JavaScript，GitHub Pages从main分支的`/docs`目录发布。页面使用按日期轮换、最近7天有效的前端 access 密码门；由于密码校验逻辑随静态页面下发，这只是邀请筛选，不是安全认证。若需要真正保密，应迁移到带后端鉴权的服务。静态页面本身不接受评分上传。
 
 本地预览：`python3 -m http.server 8880 --directory docs`。
 

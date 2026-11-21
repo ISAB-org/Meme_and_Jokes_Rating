@@ -1,5 +1,16 @@
 
 import {validateImport,mergeReviews,makePacket,newRespondent} from './review-state.js';
+// GitHub Pages has no server-side secret store. This is a rotating front-end
+// gate (deterrence only), not authentication. The organizer can distribute the
+// daily code; today's code and the previous six days are accepted.
+const ACCESS_SEED='GEM-REVIEW-2026-11';
+const gateStyle=document.createElement('style');gateStyle.textContent='#access-gate{max-width:480px;margin:18vh auto;padding:28px;background:white;border-radius:14px;box-shadow:0 8px 30px #0001}#access-gate h2{margin-top:0}#access-gate input{width:100%;margin:10px 0}#access-gate button{width:100%}#access-error{color:#b42318;min-height:1.5em}body.gated>header,body.gated>main{display:none}';document.head.append(gateStyle);document.body.classList.add('gated');const gate=document.createElement('section');gate.id='access-gate';gate.innerHTML='<h2>受邀评分入口</h2><p>请输入组织者提供的 access 密码。密码按日轮换，最近 7 天的密码均有效。</p><input id="access-code" type="password" autocomplete="one-time-code" placeholder="Access password"><button id="access-submit">进入评分</button><p id="access-error"></p><p class="muted">提示：这是 GitHub Pages 的前端访问门，不是后端安全认证。</p>';document.body.prepend(gate);
+async function digest(s){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function iso(d){return d.toISOString().slice(0,10)}
+async function validAccess(v){const now=new Date();for(let i=0;i<7;i++){const d=new Date(now);d.setUTCDate(d.getUTCDate()-i);const h=await digest(`${ACCESS_SEED}:${iso(d)}`);if(v.trim().toUpperCase()===`GEM-${h.slice(0,10).toUpperCase()}`)return true}return false}
+const unlock=async()=>{const ok=await validAccess(document.getElementById('access-code').value);if(ok){document.body.classList.remove('gated');gate.remove();sessionStorage.setItem('gem_access','1');start()}else document.getElementById('access-error').textContent='密码无效，或已超过 7 天有效期。'};
+document.getElementById('access-submit').onclick=unlock;document.getElementById('access-code').onkeydown=e=>{if(e.key==='Enter')unlock()};
+async function start(){
 const DATA=await fetch('./data.json').then(r=>{if(!r.ok)throw Error('无法加载条目');return r.json()});
 const LEGACY=Object.fromEntries(DATA.items.map(x=>[x.legacy_gem_id,x.id]));
 function normalizeReviews(src){const out={};for(const [old,v] of Object.entries(src||{})){let id=LEGACY[old]||old;if(!out[id]||(v.updated_at||'')>(out[id].updated_at||''))out[id]=v}return out}
@@ -21,4 +32,5 @@ function move(d){let p=filtered.findIndex(x=>x.id===current),n=filtered[p+d];if(
 for(const id of ['query','batch','domain','status'])$(id).addEventListener(id==='query'?'input':'change',filter);$('export').onclick=()=>{let a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(packet(),null,2)],{type:'application/json'}));a.href=url;a.download='gem_评分_'+respondent+'_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{try{if(!e.target.files[0])return;const raw=JSON.parse(await e.target.files[0].text()),validated=validateImport(raw,DATA);const existing=Object.keys(reviews).length;if(validated.respondent_id&&validated.respondent_id!==respondent&&existing)throw Error('这是另一位参与者的评分，不能混入你当前的评分记录。');reviews=mergeReviews(reviews,validated.reviews);if(validated.respondent_id)respondent=validated.respondent_id;persist();filter()}catch(err){alert('导入失败：'+err.message)}e.target.value=''};
 
 document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();move(e.key==='ArrowLeft'?-1:1)}else if(/^\d$/.test(e.key)&&current){$('score').value=e.key==='0'?10:Number(e.key);saveCurrent()}});filter();
-const params=new URLSearchParams(location.search);for(const name of ['domain','batch'])if(params.get(name)&&[...$(name).options].some(o=>o.value===params.get(name)))$(name).value=params.get(name);if(params.get('id')&&ids.has(params.get('id'))){current=params.get('id');$('query').value=current}filter();$('save').textContent='评分仅保存在本浏览器，完成后请导出 JSON 发回组织者。';
+const params=new URLSearchParams(location.search);for(const name of ['domain','batch'])if(params.get(name)&&[...$(name).options].some(o=>o.value===params.get(name)))$(name).value=params.get(name);if(params.get('id')&&ids.has(params.get('id'))){current=params.get('id');$('query').value=current}filter();$('save').textContent='评分仅保存在本浏览器，完成后请导出 JSON 发回组织者。';}
+if(sessionStorage.getItem('gem_access')==='1')unlock();
