@@ -2,7 +2,7 @@
 
 评分页面：https://isab-org.github.io/Meme_and_Jokes_Rating/
 
-这是独立的公开评分仓库。当前暂保留原始五类（铁路、航空、知乎回答、苏联、其他领域），共158条：首轮材料与首轮之外人工评分≥7的条目。编号沿用领域前缀＋四位数字＋GEM（如R0001GEM、XA0001GEM）。不包含研究主仓库的模型回答、模型分数、个人评分文件或本地备份。
+这是独立的公开评分仓库。当前共925条：GEM 与其他后续挖掘中均分≥7、尚未人工复核的条目；原一百余条首轮材料已移除。编号沿用领域前缀＋四位数字＋GEM（如R0001GEM、XA0001GEM）。不包含研究主仓库的模型回答、模型分数、个人评分文件或本地备份。
 
 ## 参与评分
 
@@ -24,7 +24,7 @@
 
 ## JSON和汇总
 
-`docs/data.json` 是公开条目，`docs/review-state.js` 定义导入、导出与合并逻辑。当前 dataset 为 `gem_first_round_plus_human7_v1`，schema_version为2.1，dataset_sha256绑定当前158条的公开内容版本。
+`docs/data.json` 是公开条目，`docs/review-state.js` 定义导入、导出与合并逻辑。当前 dataset 为 `gem_mined_human7_unreviewed_v1`，schema_version为2.2，dataset_sha256绑定当前925条的公开内容版本。
 
 组织者将回收文件存入本地`received_reviews/`，运行：
 
