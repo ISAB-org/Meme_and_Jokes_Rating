@@ -11,7 +11,7 @@ async function validAccess(v){const now=new Date();for(let i=0;i<7;i++){const d=
 const unlock=async()=>{const ok=await validAccess(document.getElementById('access-code').value);if(ok){document.body.classList.remove('gated');gate.remove();sessionStorage.setItem('gem_access','1');start()}else document.getElementById('access-error').textContent='密码无效，或已超过 7 天有效期。'};
 document.getElementById('access-submit').onclick=unlock;document.getElementById('access-code').onkeydown=e=>{if(e.key==='Enter')unlock()};
 async function start(){
-const DATA=await fetch('./data.json').then(r=>{if(!r.ok)throw Error('无法加载条目');return r.json()});
+const DATA=await fetch('./data.json?v=20261121-925').then(r=>{if(!r.ok)throw Error('无法加载条目');return r.json()});
 const LEGACY=Object.fromEntries(DATA.items.map(x=>[x.legacy_gem_id,x.id]));
 function normalizeReviews(src){const out={};for(const [old,v] of Object.entries(src||{})){let id=LEGACY[old]||old;if(!out[id]||(v.updated_at||'')>(out[id].updated_at||''))out[id]=v}return out}
 const items=DATA.items, ids=new Set(items.map(x=>x.id)), key='gem_public_rating_20261119';let reviews={},filtered=[],current='',respondent=newRespondent();const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved?.dataset_sha256===DATA.dataset_sha256){reviews=saved.reviews||{};respondent=saved.respondent_id||respondent}}catch{}
